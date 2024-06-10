@@ -7,7 +7,7 @@ from sqlalchemy.orm import mapped_column, Mapped
 from database import Base
 
 int_pk = Annotated[int, mapped_column(primary_key=True)]
-metadata_obj = MetaData()
+
 
 
 class SpimexTradingResults(Base):

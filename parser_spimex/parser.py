@@ -7,22 +7,14 @@ def panda_filter(link: str) -> pandas.core.frame.DataFrame:
     объект DataFrame нужной таблицы, с нужными солбцами
     и с отфильтрованными строками"""
 
-    # фильтруем столбцы
     df = pandas.read_excel(link, usecols='B:F,O')
-    # находим индекс начала таблицы
     start_row_index = df[df.iloc[:, 0] == 'Единица измерения: Метрическая тонна'].index[0]
-    # находим индекс конца таблицы
     end_row_index = df.iloc[start_row_index + 3:, 0][
         (df.iloc[start_row_index + 3:, 0] == 'Итого:') | (df.iloc[start_row_index + 3:, 0].isna())].index[0]
-    # обрезаем таблицу по индексам начала и конца
     df = df.iloc[start_row_index + 3:end_row_index]
-    # сбрасываем индексы
     df.reset_index(drop=True, inplace=True)
-    # выбираем колонку, по которой нужно отфильтровать по значению
     col_contract_count = df.columns[-1]
-    # приобразовываем в число
     df[col_contract_count] = pandas.to_numeric(df[col_contract_count], errors='coerce')
-    # удаляем строчки не содержащие число
     df = df[df[col_contract_count].notnull()]
     df = df[df[col_contract_count] > 0]
 
@@ -32,10 +24,10 @@ def panda_filter(link: str) -> pandas.core.frame.DataFrame:
 def parser_xls(link: str, date: str) -> list[tuple]:
     """Парсит страницу, доставая из нее необходимые данные"""
 
-    total_data_from_page = []  # итоговые данные, которые мы вернем
+    total_data_from_page = []
 
     df = panda_filter(link)
-    # получаем из каждой строчки значения и добавляем в итоговый список
+
     for row in df.itertuples(index=True, name='Pandas'):
         try:
             exchange_product_id = row[1]

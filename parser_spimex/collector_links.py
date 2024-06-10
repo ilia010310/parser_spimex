@@ -4,6 +4,13 @@ import requests
 from bs4 import BeautifulSoup
 
 
+def check_date(date: str, year: int) -> bool:
+    """Проверяем до какого года включительно нам нужны бюллетени"""
+    if int(date.split('.')[2]) < year:
+        return False
+    return True
+
+
 def collector_links_from_page(url: str) -> (list[tuple[str, str]], bool):
     """Собирает ссылки с одной страницы.
     Принимает ссылку на страницу.
@@ -11,7 +18,7 @@ def collector_links_from_page(url: str) -> (list[tuple[str, str]], bool):
 
     tm_links = []
     stop_loop = False
-    # отправляем запрос на страницу и логируем всевозможные ошибки
+
     try:
         response = requests.get(url)
     except requests.exceptions.ConnectTimeout:
@@ -25,10 +32,8 @@ def collector_links_from_page(url: str) -> (list[tuple[str, str]], bool):
         raise requests.exceptions.RequestException
     html_content = response.text
 
-    # парсим
     soup = BeautifulSoup(html_content, 'html.parser')
 
-    # получаем значения ссылок и даты
     for link in soup.find_all(
             'a',
             class_='accordeon-inner__item-title link xls')[:10]:
@@ -39,7 +44,7 @@ def collector_links_from_page(url: str) -> (list[tuple[str, str]], bool):
         for span in div.find_all('span'):
             date = span.get_text(strip=True)
 
-        if int(date.split('.')[2]) < 2024:
+        if not check_date(date, 2024):
             del tm_links[counter:]
             stop_loop = True
             break
@@ -55,10 +60,10 @@ def collector_links() -> list[tuple[str, str]]:
      со всех страниц, возвразает список с кортежами,
     в каждом из которых: ссылка в виде строки и дата в виде строки"""
 
-    num = 0  # пагинация страницы, на которой собираем ссылки
-    stop_loop = False  # флаг, обозначающий конец сбора ссылок, когда попался другой год
+    num = 0
+    stop_loop = False
 
-    total_links = []  # итоговый лист с кортежами
+    total_links = []
     while not stop_loop:
         num += 1
         url = f'https://spimex.com/markets/oil_products/trades/results/?page=page-{num}'

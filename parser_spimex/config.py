@@ -17,6 +17,6 @@ DB_PASS = os.environ.get('DB_PASS')
 
 logging.basicConfig(
     level=logging.ERROR,
-    filename="py_log.log", filemode="a",
+    filename="../py_log.log", filemode="a",
     format="%(asctime)s %(levelname)s %(message)s",
 )
